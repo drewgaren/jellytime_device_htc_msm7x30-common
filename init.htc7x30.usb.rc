@@ -1,55 +1,51 @@
+on post-fs-data
+    chown system system /sys/class/android_usb/android0/f_mass_storage/lun0/file
+    chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun0/file
+    chown system system /sys/class/android_usb/android0/f_rndis/ethaddr
+    chmod 0660 /sys/class/android_usb/android0/f_rndis/ethaddr
 
-# Used to disable USB when switching states
-on property:sys.usb.config=none
-    exec /system/bin/netcfg usb0 down
-    stop adbd
+
+on boot
+    write /sys/class/android_usb/android0/iManufacturer ${ro.product.manufacturer}
+    write /sys/class/android_usb/android0/iProduct ${ro.product.model}
+    write /sys/class/android_usb/android0/iSerial ${ro.serialno}
+    write /sys/class/android_usb/android0/f_mass_storage/inquiry_string "HTC EVO 0000"
+    write /sys/class/android_usb/android0/f_rndis/manufacturer HTC
+    write /sys/class/android_usb/android0/f_rndis/vendorID 0bb4
+    write /sys/class/android_usb/android0/f_rndis/wceis 1
+
+on property:sys.usb.config=mass_storage
     write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/bDeviceClass 0
-    setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=adb
-    start adbd
-    write /sys/devices/platform/android_usb/usb_function_switch 2 
+    write /sys/class/android_usb/android0/idVendor 0bb4
+    write /sys/class/android_usb/android0/idProduct 0cec
+    write /sys/class/android_usb/android0/functions ${sys.usb.config}
+    write /sys/class/android_usb/android0/enable 1
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.config=mass_storage,adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 0bb4
+    write /sys/class/android_usb/android0/idProduct 0cec
+    write /sys/class/android_usb/android0/functions ${sys.usb.config}
+    write /sys/class/android_usb/android0/enable 1
     start adbd
-    write /sys/devices/platform/android_usb/usb_function_switch 3
-    setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=mass_storage
-    write /sys/devices/platform/android_usb/usb_function_switch 1
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.config=rndis
-    exec /system/bin/netcfg usb0 up
-    write /sys/devices/platform/android_usb/usb_function_switch 4
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 0bb4
+    write /sys/class/android_usb/android0/idProduct 0cec
+    write /sys/class/android_usb/android0/functions ${sys.usb.config}
+    write /sys/class/android_usb/android0/bDeviceClass 224
+    write /sys/class/android_usb/android0/enable 1
     setprop sys.usb.state ${sys.usb.config}
 
 on property:sys.usb.config=rndis,adb
-    exec /system/bin/netcfg usb0 up
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 0bb4
+    write /sys/class/android_usb/android0/idProduct 0cec
+    write /sys/class/android_usb/android0/functions ${sys.usb.config}
+    write /sys/class/android_usb/android0/bDeviceClass 224
+    write /sys/class/android_usb/android0/enable 1
     start adbd
-    write /sys/devices/platform/android_usb/usb_function_switch 6
     setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=mtp
-    write /sys/devices/platform/android_usb/usb_function_switch 128
-    setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=mtp,adb
-    start adbd
-    write /sys/devices/platform/android_usb/usb_function_switch 130
-    setprop sys.usb.state ${sys.usb.config}
-
-
-on property:sys.usb.config=ptp
-    write /sys/class/android_usb/android0/f_ptp/on 1
-    write /sys/devices/platform/android_usb/usb_function_switch 128
-    setprop sys.usb.state ${sys.usb.config}
-
-on property:sys.usb.config=ptp,adb
-    start adbd
-    write /sys/class/android_usb/android0/f_ptp/on 1
-    write /sys/devices/platform/android_usb/usb_function_switch 130
-    setprop sys.usb.state ${sys.usb.config}
-
